@@ -21,7 +21,7 @@ _logging_config = dict(
     loggers={
         '': {
             'handlers': ['console'],
-            'level': logging.DEBUG,
+            'level': logging.INFO,
         },
         'influxdb': {
             'level': logging.INFO,
