@@ -40,7 +40,7 @@ setup(
 
     keywords='phillips hue python proxy',
 
-    packages=find_packages(exclude=['contrib', 'docs', 'tests']),
+    packages=find_packages('akari'),
 
     entry_points={
         'console_scripts': [
