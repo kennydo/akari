@@ -6,7 +6,7 @@ setup(
     version='0.0.1',
 
     description='Do something with Phillips Hue lights, not sure yet',
-    long_description='
+    long_description="""
     L O N G D E S C R I P T I O N
     O
     N
@@ -22,7 +22,7 @@ setup(
     I
     O
     N
-    ',
+    """,
 
     url='https://github.com/kennydo/akari',
 
@@ -43,5 +43,8 @@ setup(
     packages=find_packages(exclude=['contrib', 'docs', 'tests']),
 
     entry_points={
+        'console_scripts': [
+            'emit-light-data = akari:main',
+        ],
     },
 )
