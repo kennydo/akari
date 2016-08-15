@@ -76,6 +76,8 @@ class InfluxdbPointBuilder:
             'fields': {
                 'configured_brightness': configured_brightness,
                 'effective_brightness': effective_brightness,
+                'on_light_counter': 1 if is_on else 0,
+                'reachable_light_counter': 1 if is_reachable else 0,
             }
         })
 
