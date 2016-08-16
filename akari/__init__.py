@@ -200,6 +200,6 @@ def main(config_path):
             num_lights_unreachable=num_lights_unreachable,
         )
 
-    log.info('Sending data for %s lights to influxdb', len(point_builder.points))
+    log.info('Sending %s data points to influxdb', len(point_builder.points))
     log.debug('Logging points to influxdb: %s', point_builder.points)
     influxdb_client.write_points(point_builder.points)
