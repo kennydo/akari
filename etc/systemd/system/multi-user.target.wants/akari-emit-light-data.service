@@ -1,0 +1,11 @@
+[Unit]
+Description=Collect akari light data
+After=network.target
+
+[Service]
+User=kedo
+Type=oneshot
+ExecStart=/home/kedo/akari/venv/bin/emit-light-data --config /path/to/my/config.conf
+
+[Install]
+WantedBy=multi-user.target
