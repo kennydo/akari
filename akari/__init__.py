@@ -11,6 +11,10 @@ import akari.log_config  # noqa: F401
 
 log = logging.getLogger(__name__)
 
+#: The influxdb measurement names
+LIGHT_MEASUREMENT_NAME = 'light'
+ROOM_MEASUREMENT_NAME = 'room'
+
 
 def connect_to_hue_bridge(hue_config: configparser.SectionProxy) -> phue.Bridge:
     return phue.Bridge(
@@ -38,7 +42,7 @@ class InfluxdbPointBuilder:
         # `InfluxDBClient.write_points`-friendly stored data
         self.points = []
 
-    def add_point(
+    def add_light_point(
             self,
             *,
             light_name: str,
@@ -64,7 +68,7 @@ class InfluxdbPointBuilder:
         """
         self.points.append({
             'timestamp': self.formatted_utc_timestamp,
-            'measurement': self.measurement,
+            'measurement': LIGHT_MEASUREMENT_NAME,
             'tags': {
                 'light_name': light_name,
                 'light_unique_id': light_unique_id,
@@ -76,8 +80,38 @@ class InfluxdbPointBuilder:
             'fields': {
                 'configured_brightness': configured_brightness,
                 'effective_brightness': effective_brightness,
-                'on_light_counter': 1 if is_on else 0,
-                'reachable_light_counter': 1 if is_reachable else 0,
+            }
+        })
+
+    def add_room_point(
+            self,
+            *,
+            room_name: str,
+            room_class: str,
+            num_lights_on: int,
+            num_lights_off: int,
+            num_lights_reachable: int,
+            num_lights_unreachable: int) -> None:
+        """
+        :param room_name: the human-provided name of the room
+        :param room_class: the Hue-provided room classification
+        :param num_lights_on: how many lights in the room are on
+        :param num_lights_off: how many lights in the room are off
+        :param num_lights_reachable: how many lights in the room are reachable
+        :param num_lights_unreachable: how many lights in the room are unreachable
+        """
+        self.points.append({
+            'timestamp': self.formatted_utc_timestamp,
+            'measurement': ROOM_MEASUREMENT_NAME,
+            'tags': {
+                'room_name': room_name,
+                'room_class': room_class,
+            },
+            'fields': {
+                'num_lights_on': num_lights_on,
+                'num_lights_off': num_lights_off,
+                'num_lights_reachable': num_lights_reachable,
+                'num_lights_unreachable': num_lights_unreachable,
             }
         })
 
@@ -127,7 +161,7 @@ def main(config_path):
         else:
             effective_brightness = 0
 
-        point_builder.add_point(
+        point_builder.add_light_point(
             light_name=light['name'],
             light_unique_id=light['uniqueid'],
             room_name=room_name,
@@ -136,6 +170,34 @@ def main(config_path):
             effective_brightness=effective_brightness,
             is_on=is_on,
             is_reachable=is_reachable,
+        )
+
+    for room_id, room in rooms.items():
+        num_lights_on = 0
+        num_lights_off = 0
+        num_lights_reachable = 0
+        num_lights_unreachable = 0
+
+        for light_id in room['lights']:
+            light = lights[light_id]
+
+            if light['state']['on']:
+                num_lights_on += 1
+            else:
+                num_lights_off += 1
+
+            if light['state']['reachable']:
+                num_lights_reachable += 1
+            else:
+                num_lights_unreachable += 1
+
+        point_builder.add_room_point(
+            room_name=room['name'],
+            room_class=room['class'],
+            num_lights_on=num_lights_on,
+            num_lights_off=num_lights_off,
+            num_lights_reachable=num_lights_reachable,
+            num_lights_unreachable=num_lights_unreachable,
         )
 
     log.info('Sending data for %s lights to influxdb', len(point_builder.points))
