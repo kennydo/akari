@@ -74,12 +74,12 @@ class InfluxdbPointBuilder:
                 'light_unique_id': light_unique_id,
                 'room_name': room_name,
                 'room_class': room_class,
-                'is_on': 'true' if is_on else 'false',
-                'is_reachable': 'true' if is_reachable else 'false',
             },
             'fields': {
                 'configured_brightness': configured_brightness,
                 'effective_brightness': effective_brightness,
+                'is_on': is_on,
+                'is_reachable': is_reachable,
             }
         })
 
