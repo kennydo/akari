@@ -44,7 +44,7 @@ setup(
 
     entry_points={
         'console_scripts': [
-            'emit-light-data = akari:main',
+            'emit-light-data = akari.lights:emit_light_data',
         ],
     },
 )
