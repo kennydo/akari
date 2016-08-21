@@ -45,6 +45,7 @@ setup(
     entry_points={
         'console_scripts': [
             'emit-light-data = akari.lights:emit_light_data',
+            'emit-wifi-device-data = akari.wifi_devices:emit_wifi_device_data',
         ],
     },
 )
